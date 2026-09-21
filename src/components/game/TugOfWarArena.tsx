@@ -29,6 +29,18 @@ export function TugOfWarArena({ ropePosition = 0, pulse = null }: Props) {
         className="block h-auto w-full"
       />
 
+      {/* Sabit merkez çizgisi — zeminin üstünde, halat/bayrağın ALTINDA */}
+      <div className="pointer-events-none absolute inset-0">
+        <div
+          className="absolute left-1/2 top-[8%] h-[84%] -translate-x-1/2"
+          style={{
+            width: "3px",
+            backgroundImage:
+              "repeating-linear-gradient(to bottom, var(--foreground) 0 10px, transparent 10px 20px)",
+          }}
+        />
+      </div>
+
       {/* Hareketli katman: sadece öğrenciler, halat ve bayrak */}
       <div
         className="absolute inset-0"
@@ -52,17 +64,6 @@ export function TugOfWarArena({ ropePosition = 0, pulse = null }: Props) {
         </div>
       </div>
 
-      {/* Sabit merkez çizgisi */}
-      <div className="pointer-events-none absolute inset-0">
-        <div
-          className="absolute left-1/2 top-[8%] h-[84%] -translate-x-1/2"
-          style={{
-            width: "3px",
-            backgroundImage:
-              "repeating-linear-gradient(to bottom, var(--foreground) 0 10px, transparent 10px 20px)",
-          }}
-        />
-      </div>
     </div>
   );
 }
