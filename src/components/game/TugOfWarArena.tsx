@@ -1,4 +1,5 @@
-import tugOfWarGame from "@/assets/tug-of-war-serious.png";
+import tugOfWarGround from "@/assets/tug-of-war-ground.png";
+import tugOfWarPlayers from "@/assets/tug-of-war-players.png";
 
 type Props = {
   /** -100 (Takım 1 kazandı) .. 0 (merkez) .. +100 (Takım 2 kazandı) */
@@ -18,16 +19,30 @@ export function TugOfWarArena({ ropePosition = 0, pulse = null }: Props) {
 
   return (
     <div className="relative w-full select-none overflow-hidden bg-panel">
+      {/* Sabit katman: zemin asla hareket etmez */}
+      <img
+        src={tugOfWarGround}
+        alt=""
+        width={1584}
+        height={672}
+        draggable={false}
+        className="block h-auto w-full"
+      />
+
+      {/* Hareketli katman: sadece öğrenciler, halat ve bayrak */}
       <div
-        className="relative"
+        className="absolute inset-0"
         style={{
           transform: `translateX(${clamped * 0.15}%)`,
           transition: "transform 700ms cubic-bezier(0.22, 1, 0.36, 1)",
         }}
       >
-        <div style={{ animation, transformOrigin: "50% 50%", willChange: "transform" }}>
+        <div
+          className="h-full w-full"
+          style={{ animation, transformOrigin: "50% 50%", willChange: "transform" }}
+        >
           <img
-            src={tugOfWarGame}
+            src={tugOfWarPlayers}
             alt="Dört öğrenci ortasında kırmızı bayrak bulunan halatı çekiyor"
             width={1584}
             height={672}
@@ -37,27 +52,16 @@ export function TugOfWarArena({ ropePosition = 0, pulse = null }: Props) {
         </div>
       </div>
 
-      {/* Sabit merkez çizgisi: resimdeki hareketli çizgi gizlenir, yerine sabit çizgi çizilir */}
+      {/* Sabit merkez çizgisi */}
       <div className="pointer-events-none absolute inset-0">
-        {[
-          { top: "17%", height: "16%" },
-          { top: "47%", height: "35%" },
-        ].map((seg) => (
-          <div
-            key={seg.top}
-            className="absolute left-1/2 -translate-x-1/2 bg-panel"
-            style={{ top: seg.top, height: seg.height, width: "14%" }}
-          >
-            <div
-              className="absolute left-1/2 h-full -translate-x-1/2"
-              style={{
-                width: "3px",
-                backgroundImage:
-                  "repeating-linear-gradient(to bottom, var(--foreground) 0 10px, transparent 10px 20px)",
-              }}
-            />
-          </div>
-        ))}
+        <div
+          className="absolute left-1/2 top-[8%] h-[84%] -translate-x-1/2"
+          style={{
+            width: "3px",
+            backgroundImage:
+              "repeating-linear-gradient(to bottom, var(--foreground) 0 10px, transparent 10px 20px)",
+          }}
+        />
       </div>
     </div>
   );
