@@ -50,20 +50,26 @@ export function TugOfWarArena({ ropePosition = 0, pulse = null }: Props) {
       />
 
       {/* Hareketli katman: sadece bayrak halat boyunca kayar */}
-      <img
-        src={tugOfWarFlag}
-        alt="Halatın ortasındaki kırmızı bayrak"
-        draggable={false}
-        className="pointer-events-none absolute"
+      <div
+        className="pointer-events-none absolute inset-0"
         style={{
-          left: "49.495%",
-          top: "31.4%",
-          width: "5.177%",
           transform: `translateX(${flagOffset}%)`,
           transition: "transform 700ms cubic-bezier(0.22, 1, 0.36, 1)",
           willChange: "transform",
         }}
-      />
+      >
+        <img
+          src={tugOfWarFlag}
+          alt="Halatın ortasındaki kırmızı bayrak"
+          draggable={false}
+          className="absolute"
+          style={{
+            left: "49.495%",
+            top: "31.4%",
+            width: "5.177%",
+          }}
+        />
+      </div>
     </div>
   );
 }
