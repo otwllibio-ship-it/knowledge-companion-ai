@@ -6,4 +6,3 @@
 - [x] Akış sırası: 1) sorular 2) yarışma; QR kod yalnızca "YARIŞMAYI BAŞLAT" sonrası
 
 - [x] Halat görünürlüğü: halat tek parça ve temiz görünsün (engelleyen öğeler kaldırıldı)
-- [x] Arena: zemin + öğrenciler/halat sabit, yalnızca kırmızı bayrak hareketli (halat üzerindeki düğüm artıkları temizlendi)

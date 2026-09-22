@@ -1,6 +1,5 @@
 import tugOfWarGround from "@/assets/tug-of-war-ground.png";
-import tugOfWarPlayers from "@/assets/tug-of-war-players-fixed.png";
-import tugOfWarFlag from "@/assets/tug-of-war-flag.png";
+import tugOfWarPlayers from "@/assets/tug-of-war-players.png";
 
 type Props = {
   /** -100 (Takım 1 kazandı) .. 0 (merkez) .. +100 (Takım 2 kazandı) */
@@ -10,14 +9,17 @@ type Props = {
 
 export function TugOfWarArena({ ropePosition = 0, pulse = null }: Props) {
   const clamped = Math.max(-100, Math.min(100, ropePosition));
+  // Halat gerginliği: merkeze uzaklık arttıkça daha gergin (daha hızlı zorlanma)
+  const tension = Math.abs(clamped) / 100;
+  const strainDuration = 2.4 - tension * 1.2;
 
-  // Öğrenciler ve halat sabit durur; sadece bayrak halat boyunca kayar.
-  // Çekiş anında (pulse) bayrak kısa bir ekstra itme alır.
-  const flagOffset = clamped * 0.15 + (pulse === 1 ? -0.5 : pulse === 2 ? 0.5 : 0);
+  const animation = pulse
+    ? `tug-pull-${pulse} 0.7s cubic-bezier(0.22, 1, 0.36, 1)`
+    : `tug-strain ${strainDuration}s ease-in-out infinite`;
 
   return (
     <div className="relative w-full select-none overflow-hidden bg-panel">
-      {/* Sabit katman 1: zemin asla hareket etmez */}
+      {/* Sabit katman: zemin asla hareket etmez */}
       <img
         src={tugOfWarGround}
         alt=""
@@ -39,37 +41,29 @@ export function TugOfWarArena({ ropePosition = 0, pulse = null }: Props) {
         />
       </div>
 
-      {/* Sabit katman 2: öğrenciler ve halat — yeri asla değişmez */}
-      <img
-        src={tugOfWarPlayers}
-        alt="Halatı çeken dört öğrenci"
-        width={1584}
-        height={672}
-        draggable={false}
-        className="pointer-events-none absolute inset-0 block h-full w-full"
-      />
-
-      {/* Hareketli katman: sadece bayrak halat boyunca kayar */}
+      {/* Hareketli katman: sadece öğrenciler, halat ve bayrak */}
       <div
-        className="pointer-events-none absolute inset-0"
+        className="absolute inset-0"
         style={{
-          transform: `translateX(${flagOffset}%)`,
+          transform: `translateX(${clamped * 0.15}%)`,
           transition: "transform 700ms cubic-bezier(0.22, 1, 0.36, 1)",
-          willChange: "transform",
         }}
       >
-        <img
-          src={tugOfWarFlag}
-          alt="Halatın ortasındaki kırmızı bayrak"
-          draggable={false}
-          className="absolute"
-          style={{
-            left: "49.495%",
-            top: "31.4%",
-            width: "5.177%",
-          }}
-        />
+        <div
+          className="h-full w-full"
+          style={{ animation, transformOrigin: "50% 50%", willChange: "transform" }}
+        >
+          <img
+            src={tugOfWarPlayers}
+            alt="Dört öğrenci ortasında kırmızı bayrak bulunan halatı çekiyor"
+            width={1584}
+            height={672}
+            draggable={false}
+            className="block h-auto w-full"
+          />
+        </div>
       </div>
+
     </div>
   );
 }
