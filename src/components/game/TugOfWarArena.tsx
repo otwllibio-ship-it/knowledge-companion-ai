@@ -25,6 +25,9 @@ export function TugOfWarArena({ ropePosition = 0, pulse = null }: Props) {
         alt=""
         width={1584}
         height={672}
+        loading="eager"
+        decoding="sync"
+        fetchPriority="high"
         draggable={false}
         className="block h-auto w-full"
       />
@@ -58,6 +61,9 @@ export function TugOfWarArena({ ropePosition = 0, pulse = null }: Props) {
             alt="Dört öğrenci ortasında kırmızı bayrak bulunan halatı çekiyor"
             width={1584}
             height={672}
+            loading="eager"
+            decoding="sync"
+            fetchPriority="high"
             draggable={false}
             className="block h-auto w-full"
           />

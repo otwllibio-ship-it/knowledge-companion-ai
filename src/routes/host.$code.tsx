@@ -2,6 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import QRCode from "react-qr-code";
+import tugOfWarGround from "@/assets/tug-of-war-ground.png";
+import tugOfWarPlayers from "@/assets/tug-of-war-players.png";
 import { TugOfWarArena } from "@/components/game/TugOfWarArena";
 import { useGameState, useLeadIn } from "@/hooks/useGameState";
 import { controlRoom, createRoom } from "@/lib/game.functions";
@@ -19,6 +21,12 @@ export const Route = createFileRoute("/host/$code")({
         property: "og:description",
         content: "Sınıf ekranından yarışmayı yönet: QR kod, sorular, canlı halat konumu.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [
+      { rel: "preload", href: tugOfWarGround, as: "image", fetchPriority: "high" },
+      { rel: "preload", href: tugOfWarPlayers, as: "image", fetchPriority: "high" },
     ],
   }),
   component: HostScreen,
