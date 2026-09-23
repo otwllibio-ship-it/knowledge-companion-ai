@@ -13,24 +13,109 @@ export type QuestionRow = {
   time_limit: number;
 };
 
+export type QuestionSetRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  questionCount: number;
+};
+
 async function db() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   return supabaseAdmin;
 }
 
-export const listQuestions = createServerFn({ method: "POST" }).handler(async (): Promise<
-  QuestionRow[]
+export const listSets = createServerFn({ method: "POST" }).handler(async (): Promise<
+  QuestionSetRow[]
 > => {
   const supabase = await db();
   const { data, error } = await supabase
-    .from("questions")
-    .select(
-      "id, question, option_a, option_b, option_c, option_d, correct_answer, category, difficulty, time_limit",
-    )
+    .from("question_sets")
+    .select("id, title, description")
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
-  return data ?? [];
+  const sets = data ?? [];
+  const { data: questions } = await supabase.from("questions").select("id, set_id");
+  return sets.map((s) => ({
+    id: s.id,
+    title: s.title,
+    description: s.description,
+    questionCount: (questions ?? []).filter((q) => q.set_id === s.id).length,
+  }));
 });
+
+export const createSet = createServerFn({ method: "POST" })
+  .inputValidator((data: { title: string; description?: string }) => ({
+    title: String(data.title || "").trim().slice(0, 80),
+    description: String(data.description || "").trim().slice(0, 200),
+  }))
+  .handler(async ({ data }) => {
+    if (!data.title) throw new Error("Set adı gerekli");
+    const supabase = await db();
+    const { data: row, error } = await supabase
+      .from("question_sets")
+      .insert({ title: data.title, description: data.description || null })
+      .select("id")
+      .maybeSingle();
+    if (error || !row) throw new Error("Set oluşturulamadı");
+    return { id: row.id };
+  });
+
+export const renameSet = createServerFn({ method: "POST" })
+  .inputValidator((data: { id: string; title: string; description?: string }) => ({
+    id: String(data.id),
+    title: String(data.title || "").trim().slice(0, 80),
+    description: String(data.description || "").trim().slice(0, 200),
+  }))
+  .handler(async ({ data }) => {
+    if (!data.title) throw new Error("Set adı gerekli");
+    const supabase = await db();
+    const { error } = await supabase
+      .from("question_sets")
+      .update({ title: data.title, description: data.description || null })
+      .eq("id", data.id);
+    if (error) throw new Error("Set güncellenemedi");
+    return { ok: true };
+  });
+
+export const deleteSet = createServerFn({ method: "POST" })
+  .inputValidator((data: { id: string }) => ({ id: String(data.id) }))
+  .handler(async ({ data }) => {
+    const supabase = await db();
+    const { error } = await supabase.from("question_sets").delete().eq("id", data.id);
+    if (error) throw new Error("Set silinemedi");
+    return { ok: true };
+  });
+
+export const getSet = createServerFn({ method: "POST" })
+  .inputValidator((data: { id: string }) => ({ id: String(data.id) }))
+  .handler(async ({ data }) => {
+    const supabase = await db();
+    const { data: row, error } = await supabase
+      .from("question_sets")
+      .select("id, title, description")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("Set bulunamadı");
+    return row;
+  });
+
+export const listQuestions = createServerFn({ method: "POST" })
+  .inputValidator((data?: { setId?: string }) => ({ setId: data?.setId ? String(data.setId) : undefined }))
+  .handler(async ({ data }): Promise<QuestionRow[]> => {
+    const supabase = await db();
+    let query = supabase
+      .from("questions")
+      .select(
+        "id, question, option_a, option_b, option_c, option_d, correct_answer, category, difficulty, time_limit",
+      )
+      .order("created_at", { ascending: true });
+    if (data.setId) query = query.eq("set_id", data.setId);
+    const { data: rows, error } = await query;
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
 
 type QuestionInput = {
   question: string;
@@ -65,11 +150,15 @@ function validate(d: QuestionInput) {
 }
 
 export const addQuestion = createServerFn({ method: "POST" })
-  .inputValidator((data: QuestionInput) => clean(data))
+  .inputValidator((data: QuestionInput & { setId: string }) => ({
+    ...clean(data),
+    setId: String(data.setId),
+  }))
   .handler(async ({ data }) => {
-    validate(data);
+    const { setId, ...fields } = data;
+    validate(fields);
     const supabase = await db();
-    const { error } = await supabase.from("questions").insert(data);
+    const { error } = await supabase.from("questions").insert({ ...fields, set_id: setId });
     if (error) throw new Error("Soru kaydedilemedi");
     return { ok: true };
   });
